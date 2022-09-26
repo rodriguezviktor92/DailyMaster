@@ -1,3 +1,6 @@
-chrome.browserAction.onClicked.addListener(function () {
-  chrome.tabs.executeScript(null,{file:"app.js"});
-})
+chrome.action.onClicked.addListener(function (tab) {
+  chrome.tabs.sendMessage(
+      tab.id,
+      { text: 'click' }
+  );
+});

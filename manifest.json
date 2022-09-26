@@ -1,28 +1,29 @@
 {
-  "manifest_version":2,
+  "manifest_version": 3,
   "name": "DailyMaster",
   "description": "DailyMaster",
   "version": "1.0",
   "icons":{
     "128": "schedule.png"
-  },
-  "browser_action":{
-    "default_icon": "schedule.png"
-  },
+  },  
   "permissions":[
     "activeTab"
   ],
   "background":{
-    "scripts":["background.js"]
+    "service_worker": "background.js"
   },
+  "action": {},
   "content_scripts": [
     {
         "matches": ["<all_urls>"],
         "css": ["css/style.css","lib/main.css"],
-        "js": ["lib/main.js", "events.js"]
+        "js": ["lib/main.js", "events.js", "app.js"]
     }
   ],
   "web_accessible_resources": [
-    "images/calendar.png"
+    {
+      "resources": [ "images/calendar.png" ],
+      "matches": [ "<all_urls>" ]
+    }
   ]
 }
