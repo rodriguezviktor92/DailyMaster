@@ -1,6 +1,6 @@
 var Events = (function() {
   var create = function(users) {
-    if(!users){
+    if(!users.length){
       return []
     }
 

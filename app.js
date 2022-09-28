@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       }
     }
 
-    const users = await getUsers('http://localhost:3001/api/users/Atenea');
+    let users = await getUsers('http://localhost:3001/api/users/Atenea');
 
     const ghx_header = document.getElementById('ghx-header');
 
@@ -67,7 +67,9 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
     const divListUsers = document.getElementById('divListUsers');
     const listUsers = divListUsers.querySelector('ul');
     const img_calendar = document.getElementById('img_calendar');
-    
+    const btn_add_user = document.getElementById('btn_add_user');
+    const inputAdd_user = document.getElementById('add_user');
+
     img_calendar.src = chrome.runtime.getURL("images/calendar.png");
     
     ghx_header.setAttribute("style","display: grid;grid-template-columns: repeat(4, 1fr);grid-auto-flow: dense;direction: rtl;");
@@ -102,9 +104,38 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       active=false;
       btn_countdown.innerHTML='START'
     }
-    
+
+    const addUser = () => {
+      const inputValue = inputAdd_user.value;
+
+      if(!inputValue){
+        console.log('Escriba el nombre del usuario.')
+        return
+      }
+
+      const data = {
+        "name": inputValue,
+        "project": "Atenea"
+      };
+
+      fetch('http://localhost:3001/api/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers:{
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
+      .then(async () => {
+        users = await getUsers('http://localhost:3001/api/users/Atenea');
+        createListUsers(users);
+        inputAdd_user.value = '';
+      })
+      .catch(error => console.error('Error:', error));
+
+    }
+
     btn_countdown.addEventListener('click',start);
-    
+    btn_add_user.addEventListener('click', addUser)
     
     function updateCoutndown() {
       const minutes = Math.floor(time / 60);
