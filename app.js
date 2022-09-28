@@ -1,5 +1,25 @@
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) {
   if (msg.text === 'click') {
+
+    
+    // fetch('http://localhost:3001/api/users/Atenea')
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     users = data;
+    //     createListUsers(users)
+    //   })
+    //   .catch((error) => console.log(error))
+    async function getUsers(url) {
+      try {
+        const response = await fetch(url, { method: 'GET' });
+        const responseJSON = await response.json();
+        return responseJSON;
+      } catch (error) {
+        return []
+      }
+    }
+
+    const users = await getUsers('http://localhost:3001/api/users/Atenea');
 
     const ghx_header = document.getElementById('ghx-header');
 
@@ -28,13 +48,8 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     </section>
     
     
-    <div id="users" class="usersStyle hidden">
+    <div id="divListUsers" class="usersStyle hidden">
     <ul>
-      <li>user 1 <button>delete</button></li>
-      <li>user 2 <button>delete</button></li>
-      <li>user 3 <button>delete</button></li>
-      <li>user 4 <button>delete</button></li>
-      <li>user 5 <button>delete</button></li>
     </ul>
     </div>
     <div id="calendar" class="calendarStyle hidden"></div>
@@ -45,11 +60,12 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     const countdown_minutes = document.getElementById('countdown_minutes');
     const countdown_seconds = document.getElementById('countdown_seconds');
     const btn_countdown = document.getElementById('btn_countdown');
-    const ghx_avatar_img = document.getElementsByClassName('ghx-avatar-img');
+    
     const btn_calendar = document.getElementById('btn_calendar');
     const btn_users = document.getElementById('btn_users');
     const btn_create_events = document.getElementById('btn_create_events');
-    const users = document.getElementById('users');
+    const divListUsers = document.getElementById('divListUsers');
+    const listUsers = divListUsers.querySelector('ul');
     const img_calendar = document.getElementById('img_calendar');
     
     img_calendar.src = chrome.runtime.getURL("images/calendar.png");
@@ -57,8 +73,18 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     ghx_header.setAttribute("style","display: grid;grid-template-columns: repeat(4, 1fr);grid-auto-flow: dense;direction: rtl;");
     ghx_modes_tools.setAttribute("style","direction: ltr");
     ghx_view_selector.setAttribute("style","display: grid;grid-column: span 2;direction: ltr");
-    
-    
+   
+    const createListUsers = (users) => {
+      listUsers.innerHTML = '';
+      for (const user of users) {
+        listUsers.innerHTML += `<li>user ${user.name} <button>delete</button></li>`
+      }
+    } 
+
+    if(users){
+      createListUsers(users)
+    }
+
     const startingMinutes = 0;
     let time = startingMinutes * 60;
     
@@ -90,39 +116,43 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       time++;
     }
     
-    const mySet1 = new Set()
-    
-    for (const elem of ghx_avatar_img) {
-      mySet1.add(elem.alt.slice(10));
-    }
     
     btn_calendar.addEventListener('click',displayCalendar);
     btn_users.addEventListener('click', displayUsers);
-    btn_create_events.addEventListener('click', createEvents);
+    btn_create_events.addEventListener('click', () => createEvents(users));
     
     function displayUsers() {
-      if (users.classList.contains('hidden')) {
-        users.classList.remove('hidden');
+      if (divListUsers.classList.contains('hidden')) {
+        divListUsers.classList.remove('hidden');
       } else {
-        users.classList.add('hidden');
+        divListUsers.classList.add('hidden');
       }
     }
+
+    // extract user from DOM
+    // const ghx_avatar_img = document.getElementsByClassName('ghx-avatar-img');
+
+    // const mySet1 = new Set()
     
-    //const myArr = Array.from(mySet1)
+    // for (const elem of ghx_avatar_img) {
+    //   mySet1.add(elem.alt.slice(10));
+    // }
+
+    // //const myArr = Array.from(mySet1)
     
-    function getRandomUser(max) {
-      let random = Math.round(Math.random() * max)
-      console.log(mySet1)
-      //console.log(myArr)
-      console.log(random)
-      console.log([...mySet1]);
-    }
-    
+    // function getRandomUser(max) {
+    //   let random = Math.round(Math.random() * max)
+    //   console.log(mySet1)
+    //   //console.log(myArr)
+    //   console.log(random)
+    //   console.log([...mySet1]);
+    // }
+    // extract user from DOM
     
     let events = [];
     
-    function createEvents() {
-      events = Events.create([...mySet1]);
+    function createEvents(users) {
+      events = Events.create(users);
     }
     
     const calendarEl = document.getElementById('calendar');

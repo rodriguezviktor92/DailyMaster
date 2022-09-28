@@ -1,5 +1,9 @@
 var Events = (function() {
   var create = function(users) {
+    if(!users){
+      return []
+    }
+
     function getDaysInMonth(year, month) {
       return new Date(year, month, 0).getDate();
     }
@@ -15,15 +19,15 @@ var Events = (function() {
     const events = [];
     let counter = 0;
     
-    const getUser = () => {
+    const getUser = (users) => {
       if(counter === users.length) counter = 0
-      const user = users[counter];
+      const user = users[counter].name;
       counter++;
       return user
     }
     
     for (let i = day; i <= daysInCurrentMonth; i++) {
-      const event = {title: getUser(), start: `${currentYear}-${currentMonth}-${i}`};
+      const event = {title: getUser(users), start: `${currentYear}-${currentMonth}-${i}`};
       events.push(event);
     }
     return events;
