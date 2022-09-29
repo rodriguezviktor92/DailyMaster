@@ -1,14 +1,5 @@
 chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) {
   if (msg.text === 'click') {
-
-    
-    // fetch('http://localhost:3001/api/users/Atenea')
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     users = data;
-    //     createListUsers(users)
-    //   })
-    //   .catch((error) => console.log(error))
     async function getUsers(url) {
       try {
         const response = await fetch(url, { method: 'GET' });
@@ -69,6 +60,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
     const img_calendar = document.getElementById('img_calendar');
     const btn_add_user = document.getElementById('btn_add_user');
     const inputAdd_user = document.getElementById('add_user');
+    let btn_delete = '';
 
     img_calendar.src = chrome.runtime.getURL("images/calendar.png");
     
@@ -79,10 +71,34 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
     const createListUsers = (users) => {
       listUsers.innerHTML = '';
       for (const user of users) {
-        listUsers.innerHTML += `<li>user ${user.name} <button>delete</button></li>`
+        listUsers.innerHTML += `<li>user ${user.name} <button class="btn_delete" id="${user._id}">Delete</button></li>`
+      }
+      btn_delete = document.querySelectorAll('.btn_delete');
+
+      for (var i=0;i<btn_delete.length;i++) {
+        btn_delete[i].onclick=function(event) {
+          event.preventDefault();
+          deleteUser(event.target.id)
+        }
       }
     } 
+    
+    
 
+    function deleteUser(id){
+      fetch(`http://localhost:3001/api/users/${id}`, {
+          method: 'DELETE',        
+        })
+        .then(res => res.json())
+        .then(async (data) => {
+          if(data.deletedCount){
+            users = await getUsers('http://localhost:3001/api/users/Atenea');
+            createListUsers(users);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+      }
+    
     if(users){
       createListUsers(users)
     }
