@@ -222,10 +222,26 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       if(users){
         createListUsers(users)
       }
+      let startingMinutes = 0;
 
-      const startingMinutes = 0;
-      let time = startingMinutes * 60;
+      function difference(dt1, dt2 = new Date()){
+        const lastSesion = new Date(dt1)
+        Difference_In_Time = dt2.getTime() - lastSesion.getTime();
+        return (Difference_In_Time/1000) / 60;
+      }
+
+      const lastSesion = sessionStorage.getItem('time');
+
+      if(lastSesion){
+        data = JSON.parse(lastSesion);
+
+        if(difference(data.date) < 10){
+          startingMinutes = data.time / 60;
+        }
+      }
       
+      let time = startingMinutes * 60;
+
       let timer;
       let active=false;
       
@@ -281,6 +297,13 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         countdown_seconds.innerHTML = seconds < 10 ? `0${seconds}` : seconds;
       
         time++;
+        if(seconds === 0 || seconds === 30){
+          const lastSesion = {
+            date: new Date(),
+            time
+          }
+          sessionStorage.setItem('time', JSON.stringify(lastSesion));
+        }
       }
       
       
