@@ -28,8 +28,14 @@ var Events = (function() {
     
     for (let i = day; i <= daysInCurrentMonth; i++) {
       const day = i < 10 ? `0${i}` : i;
-      const event = {title: getUser(users), start: `${currentYear}-${currentMonth}-${day}`};
-      events.push(event);
+      const dayOfWeek = new Date(`${currentMonth}-${day}-${currentYear}`).getDay();
+      const SUNDAY = 0;
+      const SATURDAY = 6;
+
+      if(dayOfWeek !== SUNDAY && dayOfWeek !== SATURDAY){
+        const event = {title: getUser(users), start: `${currentYear}-${currentMonth}-${day}`};
+        events.push(event);
+      }
     }
     return events;
   }
