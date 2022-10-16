@@ -1,5 +1,5 @@
-var Events = (function() {
-  var create = function(users) {
+const Events = (function() {
+  const create = function(users) {
     if(!users.length){
       return []
     }
