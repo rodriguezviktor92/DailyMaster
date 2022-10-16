@@ -1,10 +1,22 @@
 .container {
   display: grid;
-    direction: ltr;
+  direction: ltr;
   position: relative;
   margin-right: 15px;
   background: #f4f5f7;
   padding: 10px;
+  z-index: 10;
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  width: 450px;
+}
+
+.container header{
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+  padding-bottom: 5px;
 }
 
 .one_colum{
@@ -29,6 +41,7 @@
   display: flex;
   grid-column: 1 / span 2;
   padding-bottom: 5px;
+  justify-content: space-between;
 }
 
 .project_selected select { 

@@ -11,17 +11,23 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       }
     }
 
-    const ghx_header = document.getElementById('ghx-header');
-    const ghx_modes_tools = document.getElementById('ghx-modes-tools');
-    const ghx_view_selector = document.getElementById('ghx-view-selector');
+    const ghx_header = document.getElementsByTagName('body');
+    // getElementById('body');
+    // const ghx_modes_tools = document.getElementById('ghx-modes-tools');
+    // const ghx_view_selector = document.getElementById('ghx-view-selector');
 
-    ghx_header.setAttribute("style","display: grid;grid-template-columns: repeat(4, 1fr);grid-auto-flow: dense;direction: rtl;");
-    ghx_modes_tools.setAttribute("style","direction: ltr");
-    ghx_view_selector.setAttribute("style","display: grid;grid-column: span 2;direction: ltr");
+    // ghx_header.setAttribute("style","display: grid;grid-template-columns: repeat(4, 1fr);grid-auto-flow: dense;direction: rtl;");
+    // ghx_modes_tools.setAttribute("style","direction: ltr");
+    // ghx_view_selector.setAttribute("style","display: grid;grid-column: span 2;direction: ltr");
 
     async function showProject(){
-      ghx_header.innerHTML += `<div id="daily-master" class="container one_colum">   
+      const template = document.createElement('div');
+      template.innerHTML = `<div id="daily-master" class="container one_colum">
       <section id="select_projects">
+      <header>
+      <label>Selecionar un proyecto</label>
+      <?xml version="1.0" ?><svg class="feather feather-move" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/></svg>
+      </header>
         <select name="" id="listprojects" class="select_project"></select>
         <div class="separator">or</div>
         <div class="add_project">
@@ -31,6 +37,29 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       </section>
       </div>`;
 
+      document.body.appendChild(template);
+
+      // dragrable
+      const wrapper = document.querySelector("#daily-master"), header = wrapper.querySelector("header");
+
+      function onDrag({movementX, movementY}){
+        let getStyle = window.getComputedStyle(wrapper);
+        let leftVal = parseInt(getStyle.left);
+        let topVal = parseInt(getStyle.top);
+        wrapper.style.left = `${leftVal + movementX}px`;
+        wrapper.style.top = `${topVal + movementY}px`;
+      }
+
+      header.addEventListener("mousedown", ()=>{
+        header.classList.add("active");
+        header.addEventListener("mousemove", onDrag);
+      });
+
+      document.addEventListener("mouseup", ()=>{
+        header.classList.remove("active");
+        header.removeEventListener("mousemove", onDrag);
+      });
+      // dragrable
       const listprojects = document.getElementById('listprojects');
       const inputProject = document.getElementById('project');
       const btn_add_project = document.getElementById('btn_add_project');
@@ -100,13 +129,14 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
     
       let users = await getData(`http://localhost:3001/api/users/${projectName}`);
 
-      daily_master.innerHTML += `<section id="project" class="project_selected">
+      daily_master.innerHTML += `<header id="project" class="project_selected">
       <select><option value="none" selected="" disabled="" hidden=""></option>
       <option value="change">Change</option>
       <option value="delete">Delete</option>
       </select>
       <label>${projectName}</label>
-      </section>
+      <?xml version="1.0" ?><svg class="feather feather-move" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="22"/></svg>
+      </header>
       <section class="timer">
       <label id="countdown_minutes" class="timer_label">00</label>
       <label id="countdown_seconds" class="timer_label">00</label>
@@ -136,6 +166,28 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       </ul>
       </div>
       <div id="calendar" class="calendarStyle hidden"></div>`;
+
+            // dragrable
+            const wrapper = document.querySelector("#daily-master"), header = wrapper.querySelector("header");
+
+            function onDrag({movementX, movementY}){
+              let getStyle = window.getComputedStyle(wrapper);
+              let leftVal = parseInt(getStyle.left);
+              let topVal = parseInt(getStyle.top);
+              wrapper.style.left = `${leftVal + movementX}px`;
+              wrapper.style.top = `${topVal + movementY}px`;
+            }
+      
+            header.addEventListener("mousedown", ()=>{
+              header.classList.add("active");
+              header.addEventListener("mousemove", onDrag);
+            });
+      
+            document.addEventListener("mouseup", ()=>{
+              header.classList.remove("active");
+              header.removeEventListener("mousemove", onDrag);
+            });
+            // dragrable
 
       const selectedProject = document.getElementById('project');
 
