@@ -17,7 +17,7 @@
     {
         "matches": ["<all_urls>"],
         "css": ["css/style.css","lib/main.css"],
-        "js": ["lib/main.js", "events.js", "app.js"]
+        "js": ["lib/main.js", "services.js", "events.js", "calendar.js", "app.js"]
     }
   ],
   "web_accessible_resources": [

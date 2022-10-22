@@ -1,25 +1,6 @@
 chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) {
   if (msg.text === 'click') {
 
-    async function getData(url) {
-      try {
-        const response = await fetch(url, { method: 'GET' });
-        const responseJSON = await response.json();
-        return responseJSON;
-      } catch (error) {
-        return []
-      }
-    }
-
-    const ghx_header = document.getElementsByTagName('body');
-    // getElementById('body');
-    // const ghx_modes_tools = document.getElementById('ghx-modes-tools');
-    // const ghx_view_selector = document.getElementById('ghx-view-selector');
-
-    // ghx_header.setAttribute("style","display: grid;grid-template-columns: repeat(4, 1fr);grid-auto-flow: dense;direction: rtl;");
-    // ghx_modes_tools.setAttribute("style","direction: ltr");
-    // ghx_view_selector.setAttribute("style","display: grid;grid-column: span 2;direction: ltr");
-
     async function showProject(){
       const template = document.createElement('div');
       template.innerHTML = `<div id="daily-master" class="container one_colum">
@@ -60,6 +41,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         header.removeEventListener("mousemove", onDrag);
       });
       // dragrable
+
       const listprojects = document.getElementById('listprojects');
       const inputProject = document.getElementById('project');
       const btn_add_project = document.getElementById('btn_add_project');
@@ -68,7 +50,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
 
       btn_add_project.addEventListener('click', addProject);
 
-      let projects = await getData('http://localhost:3001/api/projects');
+      let projects = await Services.getData('http://localhost:3001/api/projects');
 
       const createListProjects = (projects) => {
         listprojects.innerHTML = '';
@@ -102,7 +84,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           }
         }).then(res => res.json())
         .then(async () => {
-          projects = await getData('http://localhost:3001/api/projects');
+          projects = await Services.getData('http://localhost:3001/api/projects');
           
           createListProjects(projects);
           inputProject.value = '';
@@ -127,7 +109,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
 
     async function counter(projectName, projectId, daily_master){
     
-      let users = await getData(`http://localhost:3001/api/users/${projectName}`);
+      let users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
 
       daily_master.innerHTML += `<header id="project" class="project_selected">
       <select><option value="none" selected="" disabled="" hidden=""></option>
@@ -167,27 +149,27 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       </div>
       <div id="calendar" class="calendarStyle hidden"></div>`;
 
-            // dragrable
-            const wrapper = document.querySelector("#daily-master"), header = wrapper.querySelector("header");
+      // dragrable
+      const wrapper = document.querySelector("#daily-master"), header = wrapper.querySelector("header");
 
-            function onDrag({movementX, movementY}){
-              let getStyle = window.getComputedStyle(wrapper);
-              let leftVal = parseInt(getStyle.left);
-              let topVal = parseInt(getStyle.top);
-              wrapper.style.left = `${leftVal + movementX}px`;
-              wrapper.style.top = `${topVal + movementY}px`;
-            }
-      
-            header.addEventListener("mousedown", ()=>{
-              header.classList.add("active");
-              header.addEventListener("mousemove", onDrag);
-            });
-      
-            document.addEventListener("mouseup", ()=>{
-              header.classList.remove("active");
-              header.removeEventListener("mousemove", onDrag);
-            });
-            // dragrable
+      function onDrag({movementX, movementY}){
+        let getStyle = window.getComputedStyle(wrapper);
+        let leftVal = parseInt(getStyle.left);
+        let topVal = parseInt(getStyle.top);
+        wrapper.style.left = `${leftVal + movementX}px`;
+        wrapper.style.top = `${topVal + movementY}px`;
+      }
+
+      header.addEventListener("mousedown", ()=>{
+        header.classList.add("active");
+        header.addEventListener("mousemove", onDrag);
+      });
+
+      document.addEventListener("mouseup", ()=>{
+        header.classList.remove("active");
+        header.removeEventListener("mousemove", onDrag);
+      });
+      // dragrable
 
       const selectedProject = document.getElementById('project');
 
@@ -238,8 +220,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
 
       img_calendar.src = chrome.runtime.getURL("images/calendar.png");
       
-      
-    
+
       const createListUsers = (users) => {
         listUsers.innerHTML = '';
         for (const user of users) {
@@ -254,8 +235,6 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           }
         }
       } 
-      
-      
 
       function deleteUser(id){
         fetch(`http://localhost:3001/api/users/${id}`, {
@@ -264,13 +243,47 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         .then(res => res.json())
         .then(async (data) => {
           if(data.deletedCount){
-            users = await getData(`http://localhost:3001/api/users/${projectName}`);
+            users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
             createListUsers(users);
           }
         })
         .catch(error => console.error('Error:', error));
       }
       
+      const addUser = async () => {
+        const inputValue = inputAdd_user.value;
+
+        if(!inputValue){
+          console.log('Escriba el nombre del usuario.')
+          return
+        }
+
+        const user = {
+          "name": inputValue,
+          "project": projectName
+        };
+
+        try {
+          const saveUser = await Services.saveUser(user, projectName)
+  
+          if(saveUser._id){
+            users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
+            createListUsers(users);
+            inputAdd_user.value = '';
+          }
+        } catch (error) {
+          console.error('Error:', error)
+        }
+      }
+
+      function displayUsers() {
+        if (divListUsers.classList.contains('hidden')) {
+          divListUsers.classList.remove('hidden');
+        } else {
+          divListUsers.classList.add('hidden');
+        }
+      }
+
       if(users){
         createListUsers(users)
       }
@@ -309,35 +322,6 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         btn_countdown.innerHTML='START'
       }
 
-      const addUser = () => {
-        const inputValue = inputAdd_user.value;
-
-        if(!inputValue){
-          console.log('Escriba el nombre del usuario.')
-          return
-        }
-
-        const data = {
-          "name": inputValue,
-          "project": projectName
-        };
-
-        fetch('http://localhost:3001/api/users', {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers:{
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json())
-        .then(async () => {
-          users = await getData(`http://localhost:3001/api/users/${projectName}`);
-          createListUsers(users);
-          inputAdd_user.value = '';
-        })
-        .catch(error => console.error('Error:', error));
-
-      }
-
       btn_countdown.addEventListener('click',start);
       btn_add_user.addEventListener('click', addUser)
       
@@ -357,95 +341,24 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           sessionStorage.setItem('time', JSON.stringify(lastSesion));
         }
       }
-      
-      
-      btn_calendar.addEventListener('click',displayCalendar);
+
+      let events = await Services.getData(`http://localhost:3001/api/events/${projectName}`);
+
+      btn_calendar.addEventListener('click', () => Calendar.showCalendar(events));
       btn_users.addEventListener('click', displayUsers);
-      btn_create_events.addEventListener('click', () => createEvents(users));
+      btn_create_events.addEventListener('click', saveEvents);
       
-      function displayUsers() {
-        if (divListUsers.classList.contains('hidden')) {
-          divListUsers.classList.remove('hidden');
-        } else {
-          divListUsers.classList.add('hidden');
+      async function saveEvents() {
+        try {
+          const result = await Events.save(users, events, projectName)
+
+          if (await result.modifiedCount) {
+            events = await Services.getData(`http://localhost:3001/api/events/${projectName}`);
+          }
+        } catch (error) {
+          console.error('Error:', error)
         }
       }
-
-      // extract user from DOM
-      // const ghx_avatar_img = document.getElementsByClassName('ghx-avatar-img');
-
-      // const mySet1 = new Set()
-      
-      // for (const elem of ghx_avatar_img) {
-      //   mySet1.add(elem.alt.slice(10));
-      // }
-
-      // //const myArr = Array.from(mySet1)
-      
-      // function getRandomUser(max) {
-      //   let random = Math.round(Math.random() * max)
-      //   console.log(mySet1)
-      //   //console.log(myArr)
-      //   console.log(random)
-      //   console.log([...mySet1]);
-      // }
-      // extract user from DOM
-
-      let events = await getData(`http://localhost:3001/api/events/${projectName}`);
-      const eventsId = events[0]._id;     
-      
-      function createEvents(users) {
-        events = Events.create(users);
-        
-        fetch(`http://localhost:3001/api/events/${eventsId}`, {
-          method: 'PUT',
-          body: JSON.stringify(events),
-          headers:{
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json())
-        .then(async (data) => {
-          if(data.modifiedCount){
-            events = await getData(`http://localhost:3001/api/events/${projectName}`);
-          }
-        })
-        .catch(error => console.error('Error:', error));
-      }
-      
-      const calendarEl = document.getElementById('calendar');
-      
-      
-      function createCalendar(events = []) {
-        console.log(events)
-
-        return new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          timeZone: 'local',
-          editable: true,
-          headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          },
-          events: events
-        });
-      }
-      
-      let calendarShow = false;
-      
-      function displayCalendar(){
-        const calendar = createCalendar(events[0].events);
-        if(!calendarShow){
-          calendarEl.classList.remove("hidden");
-          calendarShow=true
-          calendar.render();
-          return
-        }
-      
-        calendarEl.classList.add("hidden");
-        calendarShow=false;
-      }
-
     }
   }
 });

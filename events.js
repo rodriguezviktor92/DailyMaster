@@ -39,8 +39,27 @@ const Events = (function() {
     }
     return events;
   }
-  
+      
+  async function save(users, events) {
+    const eventsId = events[0]._id;
+    events = create(users);
+    
+    try {      
+      const result = await fetch(`http://localhost:3001/api/events/${eventsId}`, {
+        method: 'PUT',
+        body: JSON.stringify(events),
+        headers:{
+          'Content-Type': 'application/json'
+        }
+      });
+
+      return await result.json()
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   return {
-    create: create
+    save
   }
 }({}))
