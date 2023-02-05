@@ -10,7 +10,7 @@ const Services = (function () {
 
   const saveUser = async function saveUSer(user) {
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch('https://dailymaster.onrender.com/api/users', {
         method: 'POST',
         body: JSON.stringify(user),
         headers:{
@@ -25,7 +25,7 @@ const Services = (function () {
 
   const deleteUser = async function deleteUser(userId) {
     try {
-      const response = await fetch(`http://localhost:3001/api/users/${userId}`, {
+      const response = await fetch(`https://dailymaster.onrender.com/api/users/${userId}`, {
         method: 'DELETE',
       });
       return await response.json();

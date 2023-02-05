@@ -50,7 +50,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
 
       btn_add_project.addEventListener('click', addProject);
 
-      let projects = await Services.getData('http://localhost:3001/api/projects');
+      let projects = await Services.getData('https://dailymaster.onrender.com/api/projects');
 
       const createListProjects = (projects) => {
         listprojects.innerHTML = '';
@@ -76,7 +76,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           "name": inputValue,
         };
 
-        fetch('http://localhost:3001/api/projects', {
+        fetch('https://dailymaster.onrender.com/api/projects', {
           method: 'POST',
           body: JSON.stringify(project),
           headers:{
@@ -84,7 +84,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           }
         }).then(res => res.json())
         .then(async () => {
-          projects = await Services.getData('http://localhost:3001/api/projects');
+          projects = await Services.getData('https://dailymaster.onrender.com/api/projects');
           
           createListProjects(projects);
           inputProject.value = '';
@@ -109,7 +109,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
 
     async function counter(projectName, projectId, daily_master){
     
-      let users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
+      let users = await Services.getData(`https://dailymaster.onrender.com/api/users/${projectName}`);
 
       daily_master.innerHTML += `<header id="project" class="project_selected">
       <select><option value="none" selected="" disabled="" hidden=""></option>
@@ -191,7 +191,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         }
 
         function deleteProject(){
-          fetch(`http://localhost:3001/api/projects/${projectId}`, {
+          fetch(`https://dailymaster.onrender.com/api/projects/${projectId}`, {
             method: 'DELETE',        
           })
           .then(res => res.json())
@@ -237,13 +237,13 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
       } 
 
       function deleteUser(id){
-        fetch(`http://localhost:3001/api/users/${id}`, {
+        fetch(`https://dailymaster.onrender.com/api/users/${id}`, {
           method: 'DELETE',        
         })
         .then(res => res.json())
         .then(async (data) => {
           if(data.deletedCount){
-            users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
+            users = await Services.getData(`https://dailymaster.onrender.com/api/users/${projectName}`);
             createListUsers(users);
           }
         })
@@ -267,7 +267,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           const saveUser = await Services.saveUser(user, projectName)
   
           if(saveUser._id){
-            users = await Services.getData(`http://localhost:3001/api/users/${projectName}`);
+            users = await Services.getData(`https://dailymaster.onrender.com/api/users/${projectName}`);
             createListUsers(users);
             inputAdd_user.value = '';
           }
@@ -342,7 +342,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
         }
       }
 
-      let events = await Services.getData(`http://localhost:3001/api/events/${projectName}`);
+      let events = await Services.getData(`https://dailymaster.onrender.com/api/events/${projectName}`);
 
       btn_calendar.addEventListener('click', () => Calendar.showCalendar(events));
       btn_users.addEventListener('click', displayUsers);
@@ -353,7 +353,7 @@ chrome.runtime.onMessage.addListener(async function (msg, sender, sendResponse) 
           const result = await Events.save(users, events, projectName)
 
           if (await result.modifiedCount) {
-            events = await Services.getData(`http://localhost:3001/api/events/${projectName}`);
+            events = await Services.getData(`https://dailymaster.onrender.com/api/events/${projectName}`);
           }
         } catch (error) {
           console.error('Error:', error)

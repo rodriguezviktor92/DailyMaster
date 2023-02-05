@@ -45,7 +45,7 @@ const Events = (function() {
     events = create(users);
     
     try {      
-      const result = await fetch(`http://localhost:3001/api/events/${eventsId}`, {
+      const result = await fetch(`https://dailymaster.onrender.com/api/events/${eventsId}`, {
         method: 'PUT',
         body: JSON.stringify(events),
         headers:{
